@@ -23,7 +23,7 @@ class Task(BaseModel):
     priority: Priority = 'low'
         
 tasks : list[Task] = []
-nextID = 1
+next_id = 1
 
 @app.get('/')
 def init():
@@ -31,30 +31,16 @@ def init():
 
 @app.post('/tasks', response_model=Task)
 def create_task(task: CreateTask):
-    global nextID
+    global next_id
     
-    newTask = Task(
-        id=nextID,
-        title=task.title,
-        description=task.description,
-        completed=task.completed,
-        priority=task.priority
-    )
-    
-    tasks.append(newTask)
-    nextID += 1
-    return newTask
+    new_task = Task(id=next_id, **task.model_dump())
+    tasks.append(new_task)
+    next_id += 1
+    return new_task
 
 @app.put('/tasks/{id}', response_model=Task)
 def update_task(id: int, task: CreateTask):
-
-    new_task = Task(
-        id=id,
-        title=task.title,
-        description=task.description,
-        completed=task.completed,
-        priority=task.priority
-    )
+    new_task = Task(id=id, **task.model_dump())
 
     for i, existing_task in enumerate(tasks):
         if existing_task.id == id:
