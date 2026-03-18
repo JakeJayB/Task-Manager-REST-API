@@ -5,14 +5,14 @@ import repositories.tasks as task_repo
 def get_all(completed: bool | None = None, priority: Priority | None = None) -> list[Task]:
     return task_repo.get_all(completed, priority)
 
-def get_by_id(id: int) -> Task | None:
-    task = task_repo.get_by_id(id)
+async def get_by_id(id: str) -> Task | None:
+    task = await task_repo.get_by_id(id)
     if task is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
     return task
     
-def create(task: CreateTask) -> Task:
-    return task_repo.create(task)
+async def create(task: CreateTask) -> Task:
+    return await task_repo.create(task)
 
 def update(id: int, task: CreateTask) -> Task:
     updated_task = task_repo.update(id, task)

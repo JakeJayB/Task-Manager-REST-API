@@ -2,6 +2,7 @@ from fastapi import status, APIRouter
 from models import Task, CreateTask, UpdateTask, Priority
 from typing import Optional
 import services.tasks as task_service
+import asyncio
 
 router = APIRouter(prefix='/tasks', tags=['tasks'])
 
@@ -10,12 +11,12 @@ def get_all_tasks(completed: Optional[bool] = None, priority: Optional[Priority]
     return task_service.get_all(completed, priority)
 
 @router.get('/{id}', response_model=Task)
-def get_task(id: int):
-    return task_service.get_by_id(id)
+async def get_task(id: str):
+    return await task_service.get_by_id(id)
 
 @router.post('/', response_model=Task, status_code=status.HTTP_201_CREATED)
-def create_task(task: CreateTask):
-    return task_service.create(task)
+async def create_task(task: CreateTask):
+    return await task_service.create(task)
 
 @router.put('/{id}', response_model=Task)
 def update_task(id: int, task: CreateTask):

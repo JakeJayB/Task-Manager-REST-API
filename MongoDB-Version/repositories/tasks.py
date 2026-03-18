@@ -1,4 +1,5 @@
 from models import Priority, Task, CreateTask, UpdateTask
+from bson import ObjectId
 import database as db
 
 
@@ -13,17 +14,30 @@ def get_all(completed: bool | None = None, priority: Priority | None = None) -> 
 
     return result
 
-def get_by_id(id: int) -> Task | None:
-    for task in db.tasks:
-        if task.id == id:
-            return task
-    return None
+# def get_by_id(id: int) -> Task | None:
+#     for task in db.tasks:
+#         if task.id == id:
+#             return task
+#     return None
 
-def create(task: CreateTask) -> Task:
-    new_task = Task(id=db.next_id, **task.model_dump())
-    db.tasks.append(new_task)
-    db.next_id += 1
-    return new_task
+
+async def get_by_id(id: str) -> Task | None:
+    collection = db.get_task_collection()
+    doc = await collection.find_one({"_id" : ObjectId(id)})
+    return Task(**doc) if doc else None
+
+# def create(task: CreateTask) -> Task:
+#     new_task = Task(id=db.next_id, **task.model_dump())
+#     db.tasks.append(new_task)
+#     db.next_id += 1
+#     return new_task
+
+async def create(task: CreateTask) -> Task:
+    collection = db.get_task_collection()
+    doc = await collection.insert_one(task.model_dump())
+    doc = await collection.find_one({'_id' : doc.inserted_id})
+    return Task(**doc)
+    
 
 def update(id: int, task: CreateTask) -> Task | None:
     new_task = Task(id=id, **task.model_dump())

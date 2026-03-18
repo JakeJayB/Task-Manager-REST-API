@@ -1,23 +1,27 @@
 # Script Purpose: Client connection to the Task Manager database
 
 from pymongo import AsyncMongoClient
+from pymongo.errors import PyMongoError
 from config import settings
-
-async def main():
     
-    client = AsyncMongoClient(settings.MONGODB_URI)
+client: AsyncMongoClient = AsyncMongoClient(settings.MONGODB_URI)
 
-    names = await client.list_database_names()
-
-    for name in names:
-        print(name)
-    db = client[settings.DB_NAME]
-
-
-    collection = db.get_collection('Tasks')
-
-    print(collection)
+async def connect():
+    print("Connecting to MongoDB...")
+    try:
+        await client.admin.command("ping")
+        print("MongoDB Connection Successful")
+    except PyMongoError as e:
+        print(f"MongoDB connection failed: {e}")
+        raise  
 
 
-import asyncio
-asyncio.run(main())
+async def disconnect():
+    print("Closing MongoDB Connection...")
+    if client is not None:
+        await client.close()
+    print("MongoDB Connection Successfully Closed")
+
+
+def get_task_collection():
+    return client[settings.DB_NAME][settings.COLLECTION_NAME]
